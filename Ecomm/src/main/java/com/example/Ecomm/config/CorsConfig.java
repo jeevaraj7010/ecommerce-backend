@@ -12,10 +12,10 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("http://ecommerce-frontend-h3as.vercel.app")
-                        .allowedMethods("*")
-                        .allowedHeaders("*");
+            	registry.addMapping("/**")
+                .allowedOrigins("https://ecommerce-frontend-h3as.vercel.app")
+                .allowedMethods("*")
+                .allowedHeaders("*");
             }
         };
     }

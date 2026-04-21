@@ -53,6 +53,8 @@ public class SecurityConfig {
                 // ✅ Preflight (CORS)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
+                
+                
                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("ROLE_USER")
                 .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAuthority("ROLE_USER")

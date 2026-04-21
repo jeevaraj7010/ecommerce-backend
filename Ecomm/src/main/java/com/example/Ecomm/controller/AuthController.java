@@ -162,6 +162,37 @@ public class AuthController {
 
         return ResponseEntity.ok("If this email exists, a reset link has been sent");
     }
+ // =========================
+ // 🏠 UPDATE ADDRESS
+ // =========================
+ @PutMapping("/update-address")
+ public ResponseEntity<?> updateAddress(
+         @RequestHeader("Authorization") String authHeader,
+         @RequestBody Map<String, String> request) {
+
+     try {
+         String token = authHeader.substring(7);
+         String username = jwtUtil.extractUsername(token);
+
+         Optional<User> optionalUser = userRepository.findByUsername(username);
+
+         if (optionalUser.isEmpty()) {
+             return ResponseEntity.badRequest().body("User not found");
+         }
+
+         User user = optionalUser.get();
+
+         user.setPhone(request.get("phone"));
+         user.setAddress(request.get("address"));
+
+         userRepository.save(user);
+
+         return ResponseEntity.ok("Address updated successfully");
+
+     } catch (Exception e) {
+         return ResponseEntity.status(403).body("Unauthorized");
+     }
+ }
     // =========================
     // 🔁 RESET PASSWORD
     // =========================

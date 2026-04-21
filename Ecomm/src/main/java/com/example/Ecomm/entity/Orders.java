@@ -15,7 +15,7 @@ public class Orders {
 
     private Long productId;
 
-    private String productName; // ✅ ADD THIS
+    private String productName; // ✅ Product name
 
     private int quantity;
 
@@ -23,27 +23,85 @@ public class Orders {
 
     private LocalDateTime orderDate;
 
+    // 🎨 Custom hoodie image
+    @Column(name = "design_image_url")
+    private String designImageUrl;
+
+    // 🚚 Order status
+    @Column(name = "status")
+    private String status;
+
+    // ✅ Constructor
     public Orders() {
         this.orderDate = LocalDateTime.now();
+        this.status = "PENDING"; // default status
     }
 
-    public Long getId() { return id; }
+    // ================= GETTERS & SETTERS =================
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getProductId() { return productId; }
-    public void setProductId(Long productId) { this.productId = productId; }
+    public String getUsername() {
+        return username;
+    }
 
-    // ✅ NEW GETTER & SETTER
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public Long getProductId() {
+        return productId;
+    }
 
-    public double getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
 
-    public LocalDateTime getOrderDate() { return orderDate; }
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    // 🎨 Custom image
+    public String getDesignImageUrl() {
+        return designImageUrl;
+    }
+
+    public void setDesignImageUrl(String designImageUrl) {
+        this.designImageUrl = designImageUrl;
+    }
+
+    // 🚚 Status
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

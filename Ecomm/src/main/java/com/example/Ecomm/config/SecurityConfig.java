@@ -31,28 +31,34 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // Public auth APIs
+                // ✅ Public APIs
                 .requestMatchers("/auth/**").permitAll()
-
-                // Public browsing
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
 
-                // Admin only product management
+                // ✅ ADMIN DASHBOARD (IMPORTANT)
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+
+                // ✅ Product management (Admin)
                 .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ROLE_ADMIN")
 
-                // User only orders
+                // ✅ Orders (User)
                 .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAuthority("ROLE_USER")
                 .requestMatchers(HttpMethod.GET, "/api/orders").hasAuthority("ROLE_USER")
 
-                // Admin view all orders
+                // ✅ Orders (Admin)
                 .requestMatchers(HttpMethod.GET, "/api/orders/all").hasAuthority("ROLE_ADMIN")
 
-                // Allow preflight requests
+                // ✅ Preflight (CORS)
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                
+                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("ROLE_USER")
+                .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAuthority("ROLE_USER")
+                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAuthority("ROLE_USER")
 
-                // Everything else needs authentication
+                // ✅ Everything else needs authentication
                 .anyRequest().authenticated()
             )
 

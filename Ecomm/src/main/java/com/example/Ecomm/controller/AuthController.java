@@ -51,11 +51,12 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
-        if (userRepository.findByUsername(username) != null) {
+        // ✅ FIXED
+        if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
-        if (userRepository.findByEmail(email) != null) {
+        if (userRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.badRequest().body("Email already registered");
         }
 
@@ -70,7 +71,6 @@ public class AuthController {
 
         return ResponseEntity.ok("User registered successfully");
     }
-
     // =========================
     // 🔐 LOGIN
     // =========================

@@ -162,9 +162,11 @@ public class AuthController {
 
         return ResponseEntity.ok("If this email exists, a reset link has been sent");
     }
- // =========================
- // 🏠 UPDATE ADDRESS
- // =========================
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
+    }
+
  @PutMapping("/update-address")
  public ResponseEntity<?> updateAddress(
          @RequestHeader("Authorization") String authHeader,

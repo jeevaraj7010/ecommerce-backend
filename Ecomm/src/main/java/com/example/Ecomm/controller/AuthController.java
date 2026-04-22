@@ -6,7 +6,6 @@ import com.example.Ecomm.security.JwtUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,30 +17,28 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin("*")
 public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final JavaMailSender mailSender;
 
     @Autowired
     public AuthController(UserRepository userRepository,
                           PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager,
                           JwtUtil jwtUtil,
                           JavaMailSender mailSender) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.mailSender = mailSender;
     }
 
     // =========================
-    // 📝 REGISTER (NO OTP)
+    // 📝 REGISTER
     // =========================
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
@@ -51,7 +48,6 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
-        // ✅ FIXED
         if (userRepository.findByUsername(username).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
@@ -69,8 +65,9 @@ public class AuthController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok("User registered successfully ✅");
     }
+
     // =========================
     // 🔐 LOGIN
     // =========================
@@ -80,17 +77,20 @@ public class AuthController {
         String username = request.get("username");
         String password = request.get("password");
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid credentials");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.badRequest().body("Invalid credentials ❌");
         }
 
-        String token = jwtUtil.generateToken(username);
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
-        return ResponseEntity.ok(Collections.singletonMap("token", token));
+        Map<String, Object> res = new HashMap<>();
+        res.put("token", token);
+        res.put("role", user.getRole());
+
+        return ResponseEntity.ok(res);
     }
 
     // =========================
@@ -102,128 +102,111 @@ public class AuthController {
         String token = authHeader.substring(7);
         String username = jwtUtil.extractUsername(token);
 
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-
-        User user = optionalUser.get();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Map<String, Object> data = new HashMap<>();
         data.put("username", user.getUsername());
-        data.put("phone", user.getPhone());
         data.put("email", user.getEmail());
+        data.put("phone", user.getPhone());
         data.put("role", user.getRole());
 
         return ResponseEntity.ok(data);
     }
 
     // =========================
-    // 📧 FORGOT PASSWORD (EMAIL)
+    // 📩 SEND OTP
     // =========================
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
 
         String email = request.get("email");
 
-        // ✅ Validate input
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body("Email is required");
-        }
-
-        // ✅ Use Optional properly
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isEmpty()) {
-            // 🔐 Security: do NOT reveal user existence
-            return ResponseEntity.ok("If this email exists, a reset link has been sent");
+            return ResponseEntity.badRequest().body("Email not registered ❌");
         }
 
         User user = optionalUser.get();
 
-        // 🔐 Generate token
-        String token = UUID.randomUUID().toString();
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
 
-        user.setResetToken(token);
-        user.setTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
         userRepository.save(user);
 
-        // 🔗 Reset link
-        String link = "https://ecommerce-frontend-h3as.vercel.app/reset-password?token=" + token;
-
-        // 📧 Send email
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Reset Password");
-        message.setText("Click here to reset your password:\n" + link);
+        message.setTo(user.getEmail());
+        message.setSubject("OTP for Password Reset");
+        message.setText("Your OTP is: " + otp + "\nValid for 5 minutes");
 
         mailSender.send(message);
 
-        return ResponseEntity.ok("If this email exists, a reset link has been sent");
-    }
-    @GetMapping("/health")
-    public String health() {
-        return "OK";
+        return ResponseEntity.ok("OTP sent successfully ✅");
     }
 
- @PutMapping("/update-address")
- public ResponseEntity<?> updateAddress(
-         @RequestHeader("Authorization") String authHeader,
-         @RequestBody Map<String, String> request) {
-
-     try {
-         String token = authHeader.substring(7);
-         String username = jwtUtil.extractUsername(token);
-
-         Optional<User> optionalUser = userRepository.findByUsername(username);
-
-         if (optionalUser.isEmpty()) {
-             return ResponseEntity.badRequest().body("User not found");
-         }
-
-         User user = optionalUser.get();
-
-         user.setPhone(request.get("phone"));
-         user.setAddress(request.get("address"));
-
-         userRepository.save(user);
-
-         return ResponseEntity.ok("Address updated successfully");
-
-     } catch (Exception e) {
-         return ResponseEntity.status(403).body("Unauthorized");
-     }
- }
     // =========================
-    // 🔁 RESET PASSWORD
+    // 🔐 VERIFY OTP + RESET PASSWORD
     // =========================
-    @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> request) {
 
-        String token = request.get("token");
+        String email = request.get("email");
+        String otp = request.get("otp");
         String newPassword = request.get("password");
 
-        Optional<User> optionalUser = userRepository.findByResetToken(token);
+        Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid token");
+            return ResponseEntity.badRequest().body("User not found ❌");
         }
 
         User user = optionalUser.get();
 
-        if (user.getTokenExpiry() == null || user.getTokenExpiry().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Token expired");
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            return ResponseEntity.badRequest().body("Invalid OTP ❌");
+        }
+
+        if (user.getOtpExpiry() == null ||
+            user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+
+            return ResponseEntity.badRequest().body("OTP expired ❌");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
-
-        // 🔐 clear token after use
-        user.setResetToken(null);
-        user.setTokenExpiry(null);
+        user.setOtp(null);
+        user.setOtpExpiry(null);
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("Password updated successfully");
+        return ResponseEntity.ok("Password reset successful ✅");
+    }
+
+    // =========================
+    // 📍 UPDATE ADDRESS
+    // =========================
+    @PutMapping("/update-address")
+    public ResponseEntity<?> updateAddress(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> request) {
+
+        try {
+            String token = authHeader.substring(7);
+            String username = jwtUtil.extractUsername(token);
+
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            user.setPhone(request.get("phone"));
+            user.setAddress(request.get("address"));
+
+            userRepository.save(user);
+
+            return ResponseEntity.ok("Address updated successfully ✅");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body("Unauthorized ❌");
+        }
     }
 }

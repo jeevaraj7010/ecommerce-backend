@@ -15,19 +15,16 @@ public class User {
     private String username;
 
     @Column(unique = true)
-    private String email;   // ✅ NEW
+    private String email;
 
     private String phone;
-
     private String address;
-
     private String password;
-
     private String role;
 
-    // 🔐 Reset password fields
-    private String resetToken;              // ✅ NEW
-    private LocalDateTime tokenExpiry;      // ✅ NEW
+    // 🔐 OTP RESET (FINAL SYSTEM)
+    private String otp;
+    private LocalDateTime otpExpiry;
 
     public User() {}
 
@@ -53,9 +50,9 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    public String getResetToken() { return resetToken; }
-    public void setResetToken(String resetToken) { this.resetToken = resetToken; }
+    public String getOtp() { return otp; }
+    public void setOtp(String otp) { this.otp = otp; }
 
-    public LocalDateTime getTokenExpiry() { return tokenExpiry; }
-    public void setTokenExpiry(LocalDateTime tokenExpiry) { this.tokenExpiry = tokenExpiry; }
+    public LocalDateTime getOtpExpiry() { return otpExpiry; }
+    public void setOtpExpiry(LocalDateTime otpExpiry) { this.otpExpiry = otpExpiry; }
 }

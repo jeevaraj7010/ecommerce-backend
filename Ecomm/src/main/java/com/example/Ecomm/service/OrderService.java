@@ -19,6 +19,14 @@ public class OrderService {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
     }
+    
+    public Orders getOrderById(Long id) {
+        return orderRepository.findById(id).orElseThrow();
+    }
+
+    public Orders save(Orders order) {
+        return orderRepository.save(order);
+    }
 
     public Orders placeOrder(String username, Long productId, int quantity) {
 

@@ -110,6 +110,10 @@ public class AuthController {
         data.put("email", user.getEmail());
         data.put("phone", user.getPhone());
         data.put("role", user.getRole());
+        data.put("street", user.getStreet());
+        data.put("city", user.getCity());
+        data.put("district", user.getDistrict());
+        data.put("pincode", user.getPincode());// 🔥 ADD THIS
 
         return ResponseEntity.ok(data);
     }
@@ -198,15 +202,39 @@ public class AuthController {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            // 🔥 GET EMAIL FROM REQUEST
+            String newEmail = request.get("email");
+
+            // 🔥 EMAIL VALIDATION (VERY IMPORTANT)
+            if (newEmail != null && !newEmail.isEmpty()) {
+
+                Optional<User> existingUser = userRepository.findByEmail(newEmail);
+
+                if (existingUser.isPresent() &&
+                    !existingUser.get().getUsername().equals(username)) {
+
+                    return ResponseEntity
+                            .badRequest()
+                            .body("Email already in use ❌");
+                }
+
+                user.setEmail(newEmail);
+            }
+
+            // 🔥 ADDRESS + PHONE UPDATE
             user.setPhone(request.get("phone"));
-            user.setAddress(request.get("address"));
+            user.setStreet(request.get("street"));
+            user.setCity(request.get("city"));
+            user.setDistrict(request.get("district"));
+            user.setPincode(request.get("pincode"));
 
-            userRepository.save(user);
+            User updatedUser = userRepository.save(user);
 
-            return ResponseEntity.ok("Address updated successfully ✅");
+            return ResponseEntity.ok(updatedUser);
 
         } catch (Exception e) {
             return ResponseEntity.status(403).body("Unauthorized ❌");
         }
     }
-}
+    }
+ 

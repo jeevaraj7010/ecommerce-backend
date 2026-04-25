@@ -14,15 +14,22 @@ public class User {
     @Column(unique = true)
     private String username;
 
-    @Column(unique = true)
+    // 🔥 EMAIL NOT UNIQUE (FIXED)
+    @Column(unique = true, nullable = true)
     private String email;
 
     private String phone;
-    private String address;
+
+    // 🔥 STRUCTURED ADDRESS
+    private String street;
+    private String city;
+    private String district;
+    private String pincode;
+
     private String password;
     private String role;
 
-    // 🔐 OTP RESET (FINAL SYSTEM)
+    // 🔐 OTP RESET
     private String otp;
     private LocalDateTime otpExpiry;
 
@@ -41,8 +48,17 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getStreet() { return street; }
+    public void setStreet(String street) { this.street = street; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
+
+    public String getPincode() { return pincode; }
+    public void setPincode(String pincode) { this.pincode = pincode; }
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }

@@ -15,7 +15,7 @@ public class Orders {
 
     private Long productId;
 
-    private String productName; // ✅ Product name
+    private String productName;
 
     private int quantity;
 
@@ -31,10 +31,20 @@ public class Orders {
     @Column(name = "status")
     private String status;
 
+    // 🚚 NEW: Tracking ID
+    @Column(name = "tracking_id")
+    private String trackingId;
+
+    // 🚚 NEW: Courier name
+    @Column(name = "courier")
+    private String courier;
+
     // ✅ Constructor
     public Orders() {
         this.orderDate = LocalDateTime.now();
-        this.status = "PENDING"; // default status
+        this.status = "PLACED"; // better than PENDING
+        this.trackingId = null;
+        this.courier = null;
     }
 
     // ================= GETTERS & SETTERS =================
@@ -87,7 +97,6 @@ public class Orders {
         return orderDate;
     }
 
-    // 🎨 Custom image
     public String getDesignImageUrl() {
         return designImageUrl;
     }
@@ -103,5 +112,23 @@ public class Orders {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // 🚚 Tracking ID
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    // 🚚 Courier
+    public String getCourier() {
+        return courier;
+    }
+
+    public void setCourier(String courier) {
+        this.courier = courier;
     }
 }

@@ -16,6 +16,19 @@ public class OrderController {
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
+    
+    @PutMapping("/{id}/ship")
+    public Orders shipOrder(@PathVariable Long id,
+                            @RequestBody java.util.Map<String, String> data) {
+
+        Orders order = orderService.getOrderById(id); // 👈 get order
+
+        order.setStatus("SHIPPED");
+        order.setTrackingId(data.get("trackingId"));
+        order.setCourier(data.get("courier"));
+
+        return orderService.save(order); // 👈 save updated order
+    }
 
     // 👤 USER places order
     @PostMapping("/{productId}/{quantity}")

@@ -48,22 +48,41 @@ public class AuthController {
         String email = request.get("email");
         String password = request.get("password");
 
+
+        // ✅ Check username
         if (userRepository.findByUsername(username).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
+            return ResponseEntity
+                    .badRequest()
+                    .body("Username already exists");
         }
 
-        if (userRepository.findByEmail(email).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already registered");
+
+        // ✅ Check email only if user entered email
+        if (email != null && !email.trim().isEmpty()) {
+
+            if (userRepository.findByEmail(email).isPresent()) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Email already registered");
+            }
         }
+
 
         User user = new User();
+
         user.setUsername(username);
         user.setPhone(phone);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+
+        user.setPassword(
+                passwordEncoder.encode(password)
+        );
+
         user.setRole("ROLE_USER");
 
+
         userRepository.save(user);
+
 
         return ResponseEntity.ok("User registered successfully ✅");
     }

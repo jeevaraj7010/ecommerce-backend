@@ -2,6 +2,7 @@ package com.example.Ecomm.controller;
 
 import com.example.Ecomm.entity.Product;
 import com.example.Ecomm.service.ProductService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,9 +24,14 @@ public class ProductController {
         return productService.saveProduct(product);
     }
 
-    // ✅ Get All Products
+    // ✅ Get All Products (supports optional pagination, default 12 per page)
     @GetMapping
-    public List<Product> getProducts() {
+    public Object getProducts(@RequestParam(required = false) Integer page,
+                              @RequestParam(required = false) Integer size) {
+        if (page != null) {
+            int pageSize = (size != null) ? size : 12;
+            return productService.getAllProductsPaged(PageRequest.of(page, pageSize));
+        }
         return productService.getAllProducts();
     }
 
@@ -41,8 +47,23 @@ public class ProductController {
         productService.deleteProduct(id);
         return "Product Deleted Successfully";
     }
+
+    // ✅ Quick Stock Update for Admin Inventory
+    @PutMapping("/{id}/stock")
+    public Product updateStock(@PathVariable Long id, @RequestBody java.util.Map<String, Integer> body) {
+        int quantity = body.getOrDefault("quantity", 0);
+        return productService.updateStock(id, quantity);
+    }
+
+    // ✅ Get Products By Category (supports optional pagination, default 12 per page)
     @GetMapping("/category/{category}")
-    public List<Product> getByCategory(@PathVariable String category) {
+    public Object getByCategory(@PathVariable String category,
+                                @RequestParam(required = false) Integer page,
+                                @RequestParam(required = false) Integer size) {
+        if (page != null) {
+            int pageSize = (size != null) ? size : 12;
+            return productService.getByCategoryPaged(category, PageRequest.of(page, pageSize));
+        }
         return productService.getByCategory(category);
     }
 }

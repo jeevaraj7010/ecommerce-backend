@@ -30,6 +30,8 @@ public class Product {
     
     private String imageUrl;
 
+    private boolean customizable = false;
+
     public String getImageUrl() {
 		return imageUrl;
 	}
@@ -37,6 +39,18 @@ public class Product {
 	public void setImageUrl(String imageUrl) {
 		this.imageUrl = imageUrl;
 	}
+
+    public boolean isCustomizable() {
+        return customizable;
+    }
+
+    public boolean getCustomizable() {
+        return customizable;
+    }
+
+    public void setCustomizable(boolean customizable) {
+        this.customizable = customizable;
+    }
 
 	public Product() {}
 

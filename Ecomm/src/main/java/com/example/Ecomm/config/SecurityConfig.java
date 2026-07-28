@@ -63,8 +63,12 @@ public class SecurityConfig {
                         // Wishlist
                         .requestMatchers("/api/wishlist/**").hasRole("USER")
 
+                        // Customization
+                        .requestMatchers("/api/customization/**").authenticated()
+
                         // Everything else
                         .anyRequest().authenticated()
+
                 )
 
                 .addFilterBefore(jwtFilter,

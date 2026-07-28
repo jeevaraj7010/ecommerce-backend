@@ -32,11 +32,15 @@ public class OrderService {
     }
 
     public Orders placeOrder(String username, Long productId, int quantity) {
-        return placeOrder(username, productId, quantity, null);
+        return placeOrder(username, productId, quantity, null, null);
+    }
+
+    public Orders placeOrder(String username, Long productId, int quantity, String designImageUrl) {
+        return placeOrder(username, productId, quantity, designImageUrl, null);
     }
 
     @Transactional
-    public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl) {
+    public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl, String customText) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -58,9 +62,13 @@ public class OrderService {
         if (designImageUrl != null && !designImageUrl.trim().isEmpty()) {
             order.setDesignImageUrl(designImageUrl);
         }
+        if (customText != null && !customText.trim().isEmpty()) {
+            order.setCustomText(customText);
+        }
 
         return orderRepository.save(order);
     }
+
 
     @Transactional
     public Orders cancelOrder(Long id, String username) {

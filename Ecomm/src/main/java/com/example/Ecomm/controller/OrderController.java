@@ -32,7 +32,7 @@ public class OrderController {
         return orderService.save(order); // 👈 save updated order
     }
 
-    // 👤 USER places order (supports optional body with designImageUrl / customImageUrl)
+    // 👤 USER places order (supports optional body with designImageUrl / customImageUrl & customText)
     @PostMapping("/{productId}/{quantity}")
     public Orders placeOrder(@PathVariable Long productId,
                              @PathVariable int quantity,
@@ -44,13 +44,17 @@ public class OrderController {
             designImageUrl = body.get("customImageUrl");
         }
 
+        String customText = (body != null) ? body.get("customText") : null;
+
         return orderService.placeOrder(
                 authentication.getName(),
                 productId,
                 quantity,
-                designImageUrl
+                designImageUrl,
+                customText
         );
     }
+
 
     // 👤 USER cancels order (restores stock)
     @PutMapping("/{id}/cancel")

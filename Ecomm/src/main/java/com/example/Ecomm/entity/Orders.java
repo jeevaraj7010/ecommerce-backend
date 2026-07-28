@@ -27,6 +27,11 @@ public class Orders {
     @Column(name = "design_image_url")
     private String designImageUrl;
 
+    // 🎨 Custom text
+    @Column(name = "custom_text")
+    private String customText;
+
+
     // 🚚 Order status
     @Column(name = "status")
     private String status;
@@ -104,6 +109,15 @@ public class Orders {
     public void setDesignImageUrl(String designImageUrl) {
         this.designImageUrl = designImageUrl;
     }
+
+    public String getCustomText() {
+        return customText;
+    }
+
+    public void setCustomText(String customText) {
+        this.customText = customText;
+    }
+
 
     // 🚚 Status
     public String getStatus() {

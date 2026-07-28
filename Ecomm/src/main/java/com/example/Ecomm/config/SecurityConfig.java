@@ -26,49 +26,49 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> {})
-            .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
 
-            .authorizeHttpRequests(auth -> auth
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // ✅ Public APIs
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
 
-                // ✅ ADMIN DASHBOARD (IMPORTANT)
-                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        // Authentication
+                        .requestMatchers("/api/auth/**").permitAll()
 
-                // ✅ Product management (Admin)
-                .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("ROLE_ADMIN")
+                        // Products
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
 
-                // ✅ Orders (User)
-                .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAuthority("ROLE_USER")
-                .requestMatchers(HttpMethod.GET, "/api/orders").hasAuthority("ROLE_USER")
+                        // Reviews
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
 
-                // ✅ Orders (Admin)
-                .requestMatchers(HttpMethod.GET, "/api/orders/all").hasAuthority("ROLE_ADMIN")
+                        // Health
+                        .requestMatchers("/health").permitAll()
 
-                // ✅ Preflight (CORS)
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                
-                .requestMatchers("/health").permitAll()
-                
-                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/reviews").hasAuthority("ROLE_USER")
-                .requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasAuthority("ROLE_USER")
-                .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").hasAuthority("ROLE_USER")
+                        // CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ✅ Everything else needs authentication
-                .anyRequest().authenticated()
-            )
+                        // Admin
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
 
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                        // Orders
+                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/orders").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/all").hasRole("ADMIN")
 
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                        // Wishlist
+                        .requestMatchers("/api/wishlist/**").hasRole("USER")
+
+                        // Everything else
+                        .anyRequest().authenticated()
+                )
+
+                .addFilterBefore(jwtFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -80,7 +80,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+            AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

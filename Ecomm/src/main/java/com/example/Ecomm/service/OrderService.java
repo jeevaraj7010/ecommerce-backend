@@ -77,8 +77,9 @@ public class OrderService {
             throw new RuntimeException("Unauthorized to cancel this order");
         }
 
-        if ("DELIVERED".equalsIgnoreCase(order.getStatus()) || "CANCELLED".equalsIgnoreCase(order.getStatus())) {
-            throw new RuntimeException("Order cannot be cancelled in status: " + order.getStatus());
+        String currentStatus = order.getStatus() != null ? order.getStatus().trim().toUpperCase() : "";
+        if (!"PLACED".equals(currentStatus)) {
+            throw new RuntimeException("Order cannot be cancelled once it moves beyond PLACED status (Current: " + order.getStatus() + ")");
         }
 
         order.setStatus("CANCELLED");

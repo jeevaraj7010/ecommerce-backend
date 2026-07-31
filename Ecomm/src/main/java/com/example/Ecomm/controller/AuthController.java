@@ -148,7 +148,7 @@ public class AuthController {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email not registered ❌");
+            return ResponseEntity.badRequest().body("Email not registered");
         }
 
         User user = optionalUser.get();

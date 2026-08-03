@@ -46,6 +46,15 @@ public class SecurityConfig {
                         // Health
                         .requestMatchers("/health").permitAll()
 
+                        // Customer Coupons
+                        .requestMatchers("/api/coupons/**").permitAll()
+
+                        // Pincode Lookup & Deliverability Check
+                        .requestMatchers("/api/location/pincode/**").permitAll()
+
+                        // Profile Address Management
+                        .requestMatchers("/api/profile/address/**").authenticated()
+
                         // CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 

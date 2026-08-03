@@ -16,11 +16,14 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final CouponService couponService;
 
     public OrderService(OrderRepository orderRepository,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        CouponService couponService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.couponService = couponService;
     }
     
     public Orders getOrderById(Long id) {
@@ -41,6 +44,16 @@ public class OrderService {
 
     @Transactional
     public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl, String customText) {
+        return placeOrder(username, productId, quantity, designImageUrl, customText, null, 0.0, 0.0, 0.0, 0.0);
+    }
+
+    @Transactional
+    public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl, String customText, String couponCode, double discountAmount, double shippingCharge, double totalSavings, double finalTotal) {
+        return placeOrder(username, productId, quantity, designImageUrl, customText, couponCode, discountAmount, shippingCharge, totalSavings, finalTotal, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    @Transactional
+    public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl, String customText, String couponCode, double discountAmount, double shippingCharge, double totalSavings, double finalTotal, String deliveryName, String deliveryPhone, String deliveryHouseNo, String deliveryStreet, String deliveryLandmark, String deliveryInstructions, String deliveryCity, String deliveryDistrict, String deliveryState, String deliveryPincode) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -65,8 +78,33 @@ public class OrderService {
         if (customText != null && !customText.trim().isEmpty()) {
             order.setCustomText(customText);
         }
+        if (couponCode != null && !couponCode.trim().isEmpty()) {
+            order.setCouponCode(couponCode.trim().toUpperCase());
+        }
+        order.setDiscountAmount(discountAmount);
+        order.setShippingCharge(shippingCharge);
+        order.setTotalSavings(totalSavings);
+        order.setFinalTotal(finalTotal > 0 ? finalTotal : order.getTotalPrice());
 
-        return orderRepository.save(order);
+        // Delivery address snapshot
+        order.setDeliveryName(deliveryName);
+        order.setDeliveryPhone(deliveryPhone);
+        order.setDeliveryHouseNo(deliveryHouseNo);
+        order.setDeliveryStreet(deliveryStreet);
+        order.setDeliveryLandmark(deliveryLandmark);
+        order.setDeliveryInstructions(deliveryInstructions);
+        order.setDeliveryCity(deliveryCity);
+        order.setDeliveryDistrict(deliveryDistrict);
+        order.setDeliveryState(deliveryState);
+        order.setDeliveryPincode(deliveryPincode);
+
+        Orders savedOrder = orderRepository.save(order);
+
+        if (couponCode != null && !couponCode.trim().isEmpty()) {
+            couponService.recordCouponUsage(username, couponCode, savedOrder.getId());
+        }
+
+        return savedOrder;
     }
 
 

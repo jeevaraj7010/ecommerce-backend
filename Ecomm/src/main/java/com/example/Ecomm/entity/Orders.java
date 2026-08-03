@@ -44,6 +44,72 @@ public class Orders {
     @Column(name = "courier")
     private String courier;
 
+    // 🎟️ Coupon & Pricing Summary
+    @Column(name = "coupon_code")
+    private String couponCode;
+
+    @Column(name = "discount_amount")
+    private double discountAmount;
+
+    @Column(name = "shipping_charge")
+    private double shippingCharge;
+
+    @Column(name = "total_savings")
+    private double totalSavings;
+
+    @Column(name = "final_total")
+    private double finalTotal;
+
+    // 🏠 Delivery Address Snapshot
+    @Column(name = "delivery_name")
+    private String deliveryName;
+
+    @Column(name = "delivery_phone")
+    private String deliveryPhone;
+
+    @Column(name = "delivery_house_no")
+    private String deliveryHouseNo;
+
+    @Column(name = "delivery_street")
+    private String deliveryStreet;
+
+    @Column(name = "delivery_landmark")
+    private String deliveryLandmark;
+
+    @Column(name = "delivery_instructions")
+    private String deliveryInstructions;
+
+    @Column(name = "delivery_city")
+    private String deliveryCity;
+
+    @Column(name = "delivery_district")
+    private String deliveryDistrict;
+
+    @Column(name = "delivery_state")
+    private String deliveryState;
+
+    @Column(name = "delivery_pincode")
+    private String deliveryPincode;
+
+    // 🚀 Shiprocket & Advanced Tracking Structure
+    @Column(name = "tracking_url")
+    private String trackingUrl;
+
+    @Column(name = "shipment_status")
+    private String shipmentStatus;
+
+    @Column(name = "awb_number")
+    private String awbNumber;
+
+    @Column(name = "estimated_delivery_date")
+    private String estimatedDeliveryDate;
+
+    @Column(name = "shipped_date")
+    private LocalDateTime shippedDate;
+
+    @Column(name = "delivered_date")
+    private LocalDateTime deliveredDate;
+
     // ✅ Constructor
     public Orders() {
         this.orderDate = LocalDateTime.now();
@@ -145,4 +211,95 @@ public class Orders {
     public void setCourier(String courier) {
         this.courier = courier;
     }
+
+    // 🎟️ Coupon Getters & Setters
+    public String getCouponCode() {
+        return couponCode;
+    }
+
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public double getShippingCharge() {
+        return shippingCharge;
+    }
+
+    public void setShippingCharge(double shippingCharge) {
+        this.shippingCharge = shippingCharge;
+    }
+
+    public double getTotalSavings() {
+        return totalSavings;
+    }
+
+    public void setTotalSavings(double totalSavings) {
+        this.totalSavings = totalSavings;
+    }
+
+    public double getFinalTotal() {
+        return finalTotal;
+    }
+
+    public void setFinalTotal(double finalTotal) {
+        this.finalTotal = finalTotal;
+    }
+
+    // 🏠 Delivery Address Snapshot Getters & Setters
+    public String getDeliveryName() { return deliveryName; }
+    public void setDeliveryName(String deliveryName) { this.deliveryName = deliveryName; }
+
+    public String getDeliveryPhone() { return deliveryPhone; }
+    public void setDeliveryPhone(String deliveryPhone) { this.deliveryPhone = deliveryPhone; }
+
+    public String getDeliveryHouseNo() { return deliveryHouseNo; }
+    public void setDeliveryHouseNo(String deliveryHouseNo) { this.deliveryHouseNo = deliveryHouseNo; }
+
+    public String getDeliveryStreet() { return deliveryStreet; }
+    public void setDeliveryStreet(String deliveryStreet) { this.deliveryStreet = deliveryStreet; }
+
+    public String getDeliveryLandmark() { return deliveryLandmark; }
+    public void setDeliveryLandmark(String deliveryLandmark) { this.deliveryLandmark = deliveryLandmark; }
+
+    public String getDeliveryInstructions() { return deliveryInstructions; }
+    public void setDeliveryInstructions(String deliveryInstructions) { this.deliveryInstructions = deliveryInstructions; }
+
+    public String getDeliveryCity() { return deliveryCity; }
+    public void setDeliveryCity(String deliveryCity) { this.deliveryCity = deliveryCity; }
+
+    public String getDeliveryDistrict() { return deliveryDistrict; }
+    public void setDeliveryDistrict(String deliveryDistrict) { this.deliveryDistrict = deliveryDistrict; }
+
+    public String getDeliveryState() { return deliveryState; }
+    public void setDeliveryState(String deliveryState) { this.deliveryState = deliveryState; }
+
+    public String getDeliveryPincode() { return deliveryPincode; }
+    public void setDeliveryPincode(String deliveryPincode) { this.deliveryPincode = deliveryPincode; }
+
+    // 🚀 Shiprocket & Tracking Getters & Setters
+    public String getTrackingUrl() { return trackingUrl; }
+    public void setTrackingUrl(String trackingUrl) { this.trackingUrl = trackingUrl; }
+
+    public String getShipmentStatus() { return shipmentStatus; }
+    public void setShipmentStatus(String shipmentStatus) { this.shipmentStatus = shipmentStatus; }
+
+    public String getAwbNumber() { return awbNumber; }
+    public void setAwbNumber(String awbNumber) { this.awbNumber = awbNumber; }
+
+    public String getEstimatedDeliveryDate() { return estimatedDeliveryDate; }
+    public void setEstimatedDeliveryDate(String estimatedDeliveryDate) { this.estimatedDeliveryDate = estimatedDeliveryDate; }
+
+    public LocalDateTime getShippedDate() { return shippedDate; }
+    public void setShippedDate(LocalDateTime shippedDate) { this.shippedDate = shippedDate; }
+
+    public LocalDateTime getDeliveredDate() { return deliveredDate; }
+    public void setDeliveredDate(LocalDateTime deliveredDate) { this.deliveredDate = deliveredDate; }
 }

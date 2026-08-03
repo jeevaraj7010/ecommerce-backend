@@ -32,26 +32,76 @@ public class OrderController {
         return orderService.save(order); // 👈 save updated order
     }
 
-    // 👤 USER places order (supports optional body with designImageUrl / customImageUrl & customText)
+    // 👤 USER places order (supports optional body with designImageUrl / customImageUrl, customText & coupon metrics)
     @PostMapping("/{productId}/{quantity}")
     public Orders placeOrder(@PathVariable Long productId,
                              @PathVariable int quantity,
-                             @RequestBody(required = false) Map<String, String> body,
+                             @RequestBody(required = false) Map<String, Object> body,
                              Authentication authentication) {
 
-        String designImageUrl = (body != null) ? body.get("designImageUrl") : null;
-        if (designImageUrl == null && body != null) {
-            designImageUrl = body.get("customImageUrl");
-        }
+        String designImageUrl = null;
+        String customText = null;
+        String couponCode = null;
+        double discountAmount = 0.0;
+        double shippingCharge = 0.0;
+        double totalSavings = 0.0;
+        double finalTotal = 0.0;
 
-        String customText = (body != null) ? body.get("customText") : null;
+        String deliveryName = null;
+        String deliveryPhone = null;
+        String deliveryHouseNo = null;
+        String deliveryStreet = null;
+        String deliveryLandmark = null;
+        String deliveryInstructions = null;
+        String deliveryCity = null;
+        String deliveryDistrict = null;
+        String deliveryState = null;
+        String deliveryPincode = null;
+
+        if (body != null) {
+            if (body.get("designImageUrl") != null) designImageUrl = String.valueOf(body.get("designImageUrl"));
+            if (designImageUrl == null && body.get("customImageUrl") != null) designImageUrl = String.valueOf(body.get("customImageUrl"));
+            if (body.get("customText") != null) customText = String.valueOf(body.get("customText"));
+            if (body.get("couponCode") != null) couponCode = String.valueOf(body.get("couponCode"));
+            
+            if (body.get("discountAmount") != null) discountAmount = Double.parseDouble(String.valueOf(body.get("discountAmount")));
+            if (body.get("shippingCharge") != null) shippingCharge = Double.parseDouble(String.valueOf(body.get("shippingCharge")));
+            if (body.get("totalSavings") != null) totalSavings = Double.parseDouble(String.valueOf(body.get("totalSavings")));
+            if (body.get("finalTotal") != null) finalTotal = Double.parseDouble(String.valueOf(body.get("finalTotal")));
+
+            if (body.get("deliveryName") != null) deliveryName = String.valueOf(body.get("deliveryName"));
+            if (body.get("deliveryPhone") != null) deliveryPhone = String.valueOf(body.get("deliveryPhone"));
+            if (body.get("deliveryHouseNo") != null) deliveryHouseNo = String.valueOf(body.get("deliveryHouseNo"));
+            if (body.get("deliveryStreet") != null) deliveryStreet = String.valueOf(body.get("deliveryStreet"));
+            if (body.get("deliveryLandmark") != null) deliveryLandmark = String.valueOf(body.get("deliveryLandmark"));
+            if (body.get("deliveryInstructions") != null) deliveryInstructions = String.valueOf(body.get("deliveryInstructions"));
+            if (body.get("deliveryCity") != null) deliveryCity = String.valueOf(body.get("deliveryCity"));
+            if (body.get("deliveryDistrict") != null) deliveryDistrict = String.valueOf(body.get("deliveryDistrict"));
+            if (body.get("deliveryState") != null) deliveryState = String.valueOf(body.get("deliveryState"));
+            if (body.get("deliveryPincode") != null) deliveryPincode = String.valueOf(body.get("deliveryPincode"));
+        }
 
         return orderService.placeOrder(
                 authentication.getName(),
                 productId,
                 quantity,
                 designImageUrl,
-                customText
+                customText,
+                couponCode,
+                discountAmount,
+                shippingCharge,
+                totalSavings,
+                finalTotal,
+                deliveryName,
+                deliveryPhone,
+                deliveryHouseNo,
+                deliveryStreet,
+                deliveryLandmark,
+                deliveryInstructions,
+                deliveryCity,
+                deliveryDistrict,
+                deliveryState,
+                deliveryPincode
         );
     }
 

@@ -32,6 +32,21 @@ public class Product {
 
     private boolean customizable = false;
 
+    @Column(name = "coupon_applicable")
+    private boolean couponApplicable = true;
+
+    public boolean isCouponApplicable() {
+        return couponApplicable;
+    }
+
+    public boolean getCouponApplicable() {
+        return couponApplicable;
+    }
+
+    public void setCouponApplicable(boolean couponApplicable) {
+        this.couponApplicable = couponApplicable;
+    }
+
     public String getImageUrl() {
 		return imageUrl;
 	}

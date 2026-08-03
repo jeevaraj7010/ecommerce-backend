@@ -16,4 +16,6 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
     Page<Orders> findAll(Pageable pageable);
 
     boolean existsByUsernameAndProductIdAndStatus(String username, Long productId, String status);
+
+    List<Orders> findByCouponCodeIgnoreCase(String couponCode);
 }

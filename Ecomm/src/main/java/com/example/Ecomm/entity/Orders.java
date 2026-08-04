@@ -15,6 +15,12 @@ public class Orders {
 
     private Long productId;
 
+    @Column(name = "variant_id")
+    private Long variantId;
+
+    @Column(name = "size")
+    private String size;
+
     private String productName;
 
     private int quantity;
@@ -138,6 +144,22 @@ public class Orders {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public Long getVariantId() {
+        return variantId;
+    }
+
+    public void setVariantId(Long variantId) {
+        this.variantId = variantId;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 
     public String getProductName() {

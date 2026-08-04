@@ -2,8 +2,10 @@ package com.example.Ecomm.service;
 
 import com.example.Ecomm.entity.Orders;
 import com.example.Ecomm.entity.Product;
+import com.example.Ecomm.entity.ProductVariant;
 import com.example.Ecomm.repository.OrderRepository;
 import com.example.Ecomm.repository.ProductRepository;
+import com.example.Ecomm.repository.ProductVariantRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,13 +18,16 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final ProductVariantRepository variantRepository;
     private final CouponService couponService;
 
     public OrderService(OrderRepository orderRepository,
                         ProductRepository productRepository,
+                        ProductVariantRepository variantRepository,
                         CouponService couponService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.variantRepository = variantRepository;
         this.couponService = couponService;
     }
     
@@ -54,22 +59,61 @@ public class OrderService {
 
     @Transactional
     public synchronized Orders placeOrder(String username, Long productId, int quantity, String designImageUrl, String customText, String couponCode, double discountAmount, double shippingCharge, double totalSavings, double finalTotal, String deliveryName, String deliveryPhone, String deliveryHouseNo, String deliveryStreet, String deliveryLandmark, String deliveryInstructions, String deliveryCity, String deliveryDistrict, String deliveryState, String deliveryPincode) {
+        return placeOrder(username, productId, null, null, quantity, designImageUrl, customText, couponCode, discountAmount, shippingCharge, totalSavings, finalTotal, deliveryName, deliveryPhone, deliveryHouseNo, deliveryStreet, deliveryLandmark, deliveryInstructions, deliveryCity, deliveryDistrict, deliveryState, deliveryPincode);
+    }
+
+    @Transactional
+    public synchronized Orders placeOrder(String username, Long productId, Long variantId, String size, int quantity, String designImageUrl, String customText, String couponCode, double discountAmount, double shippingCharge, double totalSavings, double finalTotal, String deliveryName, String deliveryPhone, String deliveryHouseNo, String deliveryStreet, String deliveryLandmark, String deliveryInstructions, String deliveryCity, String deliveryDistrict, String deliveryState, String deliveryPincode) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (product.getQuantity() < quantity) {
-            throw new RuntimeException("Not enough stock available");
-        }
+        ProductVariant selectedVariant = null;
 
-        // reduce stock
-        product.setQuantity(product.getQuantity() - quantity);
-        productRepository.save(product);
+        if (Boolean.TRUE.equals(product.getVariantEnabled())) {
+            if (variantId != null) {
+                selectedVariant = variantRepository.findByIdForUpdate(variantId).orElse(null);
+            }
+            if (selectedVariant == null && size != null && !size.trim().isEmpty()) {
+                ProductVariant temp = variantRepository.findByProductIdAndSizeAndActiveTrue(productId, size.trim().toUpperCase()).orElse(null);
+                if (temp != null) {
+                    selectedVariant = variantRepository.findByIdForUpdate(temp.getId()).orElse(null);
+                }
+            }
+
+            if (selectedVariant == null) {
+                throw new RuntimeException("Selected size variant is not available for this product.");
+            }
+
+            if (selectedVariant.getStockQuantity() < quantity) {
+                throw new RuntimeException("Only " + selectedVariant.getStockQuantity() + " items available for selected size.");
+            }
+
+            // Deduct variant stock under lock
+            selectedVariant.setStockQuantity(selectedVariant.getStockQuantity() - quantity);
+            variantRepository.save(selectedVariant);
+
+            // Sync total product quantity
+            syncProductTotalQuantity(product);
+            productRepository.save(product);
+        } else {
+            if (product.getQuantity() < quantity) {
+                throw new RuntimeException("Not enough stock available");
+            }
+            product.setQuantity(product.getQuantity() - quantity);
+            productRepository.save(product);
+        }
 
         Orders order = new Orders();
         order.setUsername(username);
         order.setProductName(product.getName());
         order.setProductId(productId);
+        if (selectedVariant != null) {
+            order.setVariantId(selectedVariant.getId());
+            order.setSize(selectedVariant.getSize());
+        } else if (size != null && !size.trim().isEmpty()) {
+            order.setSize(size.trim().toUpperCase());
+        }
         order.setQuantity(quantity);
         order.setTotalPrice(product.getPrice() * quantity);
         if (designImageUrl != null && !designImageUrl.trim().isEmpty()) {
@@ -107,7 +151,6 @@ public class OrderService {
         return savedOrder;
     }
 
-
     @Transactional
     public Orders cancelOrder(Long id, String username) {
         Orders order = getOrderById(id);
@@ -123,13 +166,34 @@ public class OrderService {
         order.setStatus("CANCELLED");
         Orders savedOrder = orderRepository.save(order);
 
-        // Restore stock
-        productRepository.findById(order.getProductId()).ifPresent(product -> {
-            product.setQuantity(product.getQuantity() + order.getQuantity());
-            productRepository.save(product);
-        });
+        // Restore stock under lock
+        if (order.getVariantId() != null) {
+            variantRepository.findByIdForUpdate(order.getVariantId()).ifPresent(variant -> {
+                variant.setStockQuantity(variant.getStockQuantity() + order.getQuantity());
+                variantRepository.save(variant);
+                if (variant.getProduct() != null) {
+                    syncProductTotalQuantity(variant.getProduct());
+                    productRepository.save(variant.getProduct());
+                }
+            });
+        } else {
+            productRepository.findById(order.getProductId()).ifPresent(product -> {
+                product.setQuantity(product.getQuantity() + order.getQuantity());
+                productRepository.save(product);
+            });
+        }
 
         return savedOrder;
+    }
+
+    private void syncProductTotalQuantity(Product product) {
+        if (Boolean.TRUE.equals(product.getVariantEnabled()) && product.getVariants() != null) {
+            int total = product.getVariants().stream()
+                    .filter(ProductVariant::isActive)
+                    .mapToInt(ProductVariant::getStockQuantity)
+                    .sum();
+            product.setQuantity(total);
+        }
     }
 
     public boolean hasDeliveredOrder(String username, Long productId) {

@@ -29,6 +29,16 @@ public class Product {
     @Column(name = "coupon_applicable", nullable = false)
     private Boolean couponApplicable = true;
 
+    @Column(name = "variant_enabled", nullable = false)
+    private Boolean variantEnabled = false;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<ProductVariant> variants = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private java.util.List<ProductImage> images = new java.util.ArrayList<>();
+
     public Product() {
     }
 
@@ -142,5 +152,41 @@ public class Product {
 
     public void setCouponApplicable(Boolean couponApplicable) {
         this.couponApplicable = couponApplicable;
+    }
+
+    // ===========================
+    // Variant Enabled
+    // ===========================
+
+    public Boolean getVariantEnabled() {
+        return variantEnabled;
+    }
+
+    public Boolean isVariantEnabled() {
+        return variantEnabled;
+    }
+
+    public void setVariantEnabled(Boolean variantEnabled) {
+        this.variantEnabled = variantEnabled;
+    }
+
+    // ===========================
+    // Variants & Images
+    // ===========================
+
+    public java.util.List<ProductVariant> getVariants() {
+        return variants;
+    }
+
+    public void setVariants(java.util.List<ProductVariant> variants) {
+        this.variants = variants;
+    }
+
+    public java.util.List<ProductImage> getImages() {
+        return images;
+    }
+
+    public void setImages(java.util.List<ProductImage> images) {
+        this.images = images;
     }
 }

@@ -58,7 +58,16 @@ public class OrderController {
         String deliveryState = null;
         String deliveryPincode = null;
 
+        Long variantId = null;
+        String size = null;
+
         if (body != null) {
+            if (body.get("variantId") != null) {
+                try {
+                    variantId = Long.parseLong(String.valueOf(body.get("variantId")));
+                } catch (Exception e) {}
+            }
+            if (body.get("size") != null) size = String.valueOf(body.get("size"));
             if (body.get("designImageUrl") != null) designImageUrl = String.valueOf(body.get("designImageUrl"));
             if (designImageUrl == null && body.get("customImageUrl") != null) designImageUrl = String.valueOf(body.get("customImageUrl"));
             if (body.get("customText") != null) customText = String.valueOf(body.get("customText"));
@@ -84,6 +93,8 @@ public class OrderController {
         return orderService.placeOrder(
                 authentication.getName(),
                 productId,
+                variantId,
+                size,
                 quantity,
                 designImageUrl,
                 customText,

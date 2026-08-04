@@ -1,11 +1,14 @@
 package com.example.Ecomm.controller;
 
+import com.example.Ecomm.dto.ProductCustomerDTO;
 import com.example.Ecomm.entity.Product;
 import com.example.Ecomm.service.ProductService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -24,21 +27,25 @@ public class ProductController {
         return productService.saveProduct(product);
     }
 
-    // ✅ Get All Products (supports optional pagination, default 12 per page)
+    // ✅ Get All Products (supports optional pagination)
     @GetMapping
     public Object getProducts(@RequestParam(required = false) Integer page,
                               @RequestParam(required = false) Integer size) {
         if (page != null) {
             int pageSize = (size != null) ? size : 12;
-            return productService.getAllProductsPaged(PageRequest.of(page, pageSize));
+            Page<Product> paged = productService.getAllProductsPaged(PageRequest.of(page, pageSize));
+            return paged.map(ProductCustomerDTO::fromEntity);
         }
-        return productService.getAllProducts();
+        return productService.getAllProducts().stream()
+                .map(ProductCustomerDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    // ✅ 🔥 Get Product By ID (IMPORTANT FIX)
+    // ✅ Get Product By ID (Returns ProductCustomerDTO with variants & gallery images)
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public ProductCustomerDTO getProductById(@PathVariable Long id) {
+        Product product = productService.getProductById(id);
+        return ProductCustomerDTO.fromEntity(product);
     }
 
     // ✅ Delete Product
@@ -55,15 +62,18 @@ public class ProductController {
         return productService.updateStock(id, quantity);
     }
 
-    // ✅ Get Products By Category (supports optional pagination, default 12 per page)
+    // ✅ Get Products By Category (supports optional pagination)
     @GetMapping("/category/{category}")
     public Object getByCategory(@PathVariable String category,
                                 @RequestParam(required = false) Integer page,
                                 @RequestParam(required = false) Integer size) {
         if (page != null) {
             int pageSize = (size != null) ? size : 12;
-            return productService.getByCategoryPaged(category, PageRequest.of(page, pageSize));
+            Page<Product> paged = productService.getByCategoryPaged(category, PageRequest.of(page, pageSize));
+            return paged.map(ProductCustomerDTO::fromEntity);
         }
-        return productService.getByCategory(category);
+        return productService.getByCategory(category).stream()
+                .map(ProductCustomerDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }

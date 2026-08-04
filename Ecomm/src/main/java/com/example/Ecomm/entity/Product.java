@@ -23,13 +23,13 @@ public class Product {
 
     private String imageUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     private Boolean customizable = false;
 
-    @Column(name = "coupon_applicable", nullable = false)
+    @Column(name = "coupon_applicable", nullable = false, columnDefinition = "boolean default true")
     private Boolean couponApplicable = true;
 
-    @Column(name = "variant_enabled", nullable = false)
+    @Column(name = "variant_enabled", nullable = false, columnDefinition = "boolean default false")
     private Boolean variantEnabled = false;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

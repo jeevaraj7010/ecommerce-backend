@@ -22,6 +22,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return true;
+        }
+
+        return path.startsWith("/auth/") ||
+               path.equals("/health") ||
+               (path.startsWith("/api/products") && "GET".equalsIgnoreCase(method)) ||
+               (path.startsWith("/api/reviews") && "GET".equalsIgnoreCase(method)) ||
+               path.startsWith("/api/coupons") ||
+               path.startsWith("/api/location");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                    HttpServletResponse response,
                                    FilterChain filterChain)
@@ -36,13 +53,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
 
                 String username = jwtUtil.extractUsername(token);
-                String role = jwtUtil.extractRole(token); // 🔥 IMPORTANT
+                String role = jwtUtil.extractRole(token);
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 username,
                                 null,
-                                List.of(new SimpleGrantedAuthority(role)) // 🔥 ROLE_ADMIN
+                                List.of(new SimpleGrantedAuthority(role))
                         );
 
                 authToken.setDetails(

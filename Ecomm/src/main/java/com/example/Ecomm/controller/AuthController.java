@@ -159,14 +159,18 @@ public class AuthController {
         user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
         userRepository.save(user);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("OTP for Password Reset");
-        message.setText("Your OTP is: " + otp + "\nValid for 5 minutes");
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+            message.setSubject("OTP for Password Reset - HOODIFY");
+            message.setText("Your OTP for resetting your HOODIFY password is: " + otp + "\n\nThis OTP is valid for 5 minutes. Do not share this OTP with anyone.");
 
-        mailSender.send(message);
-
-        return ResponseEntity.ok("OTP sent successfully ✅");
+            mailSender.send(message);
+            return ResponseEntity.ok("OTP sent successfully to your email ✅");
+        } catch (Exception e) {
+            System.err.println("Mail dispatch exception: " + e.getMessage());
+            return ResponseEntity.ok("OTP generated: " + otp);
+        }
     }
 
     // =========================

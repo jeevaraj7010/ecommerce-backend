@@ -26,7 +26,7 @@ public class ProductService {
     }
 
     public List<Product> getAllProducts() {
-        return productRepository.findAll();
+        return productRepository.findAllWithDetails();
     }
 
     public Page<Product> getAllProductsPaged(Pageable pageable) {
@@ -34,14 +34,13 @@ public class ProductService {
     }
 
     public List<Product> getByCategory(String category) {
-        return productRepository.findByCategory(category);
+        return productRepository.findByCategoryWithDetails(category);
     }
 
     public Page<Product> getByCategoryPaged(String category, Pageable pageable) {
         return productRepository.findByCategory(category, pageable);
     }
 
-    // ✅ 🔥 Get by ID
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
